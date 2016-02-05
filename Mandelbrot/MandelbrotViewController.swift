@@ -30,9 +30,9 @@ class MandelbrotViewController: NSViewController {
   
   
   // Handles to move and zoom
-  private var oldZoom: Float = 205614.0//1.0
-  private var shiftX: Float = 0.858308//0
-  private var shiftY: Float = 0.240118//0
+  private var oldZoom: Float = 1.0
+  private var shiftX: Float = 0
+  private var shiftY: Float = 0
   
   
   @IBOutlet var metalView: MTKView! {
