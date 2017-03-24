@@ -18,11 +18,11 @@ struct Uniform {
   var maxNumberOfiterations: Float = 500
   var aspectRatio: Float = 1
   
-  private var raw: [Float] {
+  fileprivate var raw: [Float] {
     return [scale, translation.x, translation.y, maxNumberOfiterations, aspectRatio, 0, 0, 0]
   }
   
-  static var size = sizeof(Float) * 8
+  static var size = MemoryLayout<Float>.size * 8
 }
 
 
@@ -30,23 +30,24 @@ struct Uniform {
 class BufferProvider {
   
   // General values
-  static let floatSize = sizeof(Float)
+  static let floatSize = MemoryLayout<Float>.size
   static var bufferSize = Uniform.size
   
   // Reuse related
-  private(set) var indexOfAvaliableBuffer = 0
-  private(set) var numberOfInflightBuffers: Int
-  private var buffers:[MTLBuffer]
-  private(set) var avaliableResourcesSemaphore:dispatch_semaphore_t
+  fileprivate(set) var indexOfAvaliableBuffer = 0
+  fileprivate(set) var numberOfInflightBuffers: Int
+  fileprivate var buffers:[MTLBuffer]
+  fileprivate(set) var avaliableResourcesSemaphore:DispatchSemaphore
   
   init(inFlightBuffers: Int, device: MTLDevice) {
     
-    avaliableResourcesSemaphore = dispatch_semaphore_create(inFlightBuffers)
+    avaliableResourcesSemaphore = DispatchSemaphore(value: inFlightBuffers)
     
     numberOfInflightBuffers = inFlightBuffers
     buffers = [MTLBuffer]()
-    for (var i = 0; i < inFlightBuffers; i++) {
-      let buffer = device.newBufferWithLength(BufferProvider.bufferSize, options: MTLResourceOptions.CPUCacheModeDefaultCache)
+    
+    for _ in 0 ..< inFlightBuffers {
+      let buffer = device.makeBuffer(length: BufferProvider.bufferSize, options: MTLResourceOptions())
       buffer.label = "Uniform buffer"
       buffers.append(buffer)
     }
@@ -54,14 +55,15 @@ class BufferProvider {
   
   deinit{
     for _ in 0...numberOfInflightBuffers{
-      dispatch_semaphore_signal(avaliableResourcesSemaphore)
+      avaliableResourcesSemaphore.signal()
     }
   }
   
-  func nextBufferWithData(uniform: Uniform) -> MTLBuffer {
+  func nextBufferWithData(_ uniform: Uniform) -> MTLBuffer {
     
     // Cycle through buffers
-    let uniformBuffer = self.buffers[indexOfAvaliableBuffer++]
+    let uniformBuffer = self.buffers[indexOfAvaliableBuffer]
+    indexOfAvaliableBuffer += 1
     if indexOfAvaliableBuffer == numberOfInflightBuffers {
       indexOfAvaliableBuffer = 0
     }

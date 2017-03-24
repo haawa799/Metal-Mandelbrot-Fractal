@@ -27,22 +27,22 @@ struct Square {
     
     var vertices = [A, B, C, B, D, C]
     vertexCount = vertices.count
-    vertexBuffer = device.newBufferWithBytes(&vertices, length: vertices.count * sizeof(Vertex), options: MTLResourceOptions.CPUCacheModeDefaultCache)
+    vertexBuffer = device.makeBuffer(bytes: &vertices, length: vertices.count * MemoryLayout<Vertex>.size, options: MTLResourceOptions())
   }
   
-  func defaultSampler(device: MTLDevice) -> MTLSamplerState
+  func defaultSampler(_ device: MTLDevice) -> MTLSamplerState
   {
     let pSamplerDescriptor:MTLSamplerDescriptor? = MTLSamplerDescriptor();
     
     if let sampler = pSamplerDescriptor
     {
-      sampler.minFilter             = MTLSamplerMinMagFilter.Nearest
-      sampler.magFilter             = MTLSamplerMinMagFilter.Nearest
-      sampler.mipFilter             = MTLSamplerMipFilter.Nearest
+      sampler.minFilter             = MTLSamplerMinMagFilter.nearest
+      sampler.magFilter             = MTLSamplerMinMagFilter.nearest
+      sampler.mipFilter             = MTLSamplerMipFilter.nearest
       sampler.maxAnisotropy         = 1
-      sampler.sAddressMode          = MTLSamplerAddressMode.ClampToEdge
-      sampler.tAddressMode          = MTLSamplerAddressMode.ClampToEdge
-      sampler.rAddressMode          = MTLSamplerAddressMode.ClampToEdge
+      sampler.sAddressMode          = MTLSamplerAddressMode.clampToEdge
+      sampler.tAddressMode          = MTLSamplerAddressMode.clampToEdge
+      sampler.rAddressMode          = MTLSamplerAddressMode.clampToEdge
       sampler.normalizedCoordinates = true
       sampler.lodMinClamp           = 0
       sampler.lodMaxClamp           = FLT_MAX
@@ -51,7 +51,7 @@ struct Square {
     {
       print(">> ERROR: Failed creating a sampler descriptor!")
     }
-    return device.newSamplerStateWithDescriptor(pSamplerDescriptor!)
+    return device.makeSamplerState(descriptor: pSamplerDescriptor!)
   }
   
 }
