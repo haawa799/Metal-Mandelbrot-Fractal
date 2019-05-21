@@ -47,9 +47,10 @@ class BufferProvider {
     buffers = [MTLBuffer]()
     
     for _ in 0 ..< inFlightBuffers {
-      let buffer = device.makeBuffer(length: BufferProvider.bufferSize, options: MTLResourceOptions())
-      buffer.label = "Uniform buffer"
-      buffers.append(buffer)
+      if let buffer = device.makeBuffer(length: BufferProvider.bufferSize, options: MTLResourceOptions()) {
+        buffer.label = "Uniform buffer"
+        buffers.append(buffer)
+      }
     }
   }
   

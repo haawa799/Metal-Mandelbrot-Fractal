@@ -48,14 +48,12 @@ class MandelbrotViewController: NSViewController {
     super.viewDidLoad()
     
     setupMetal()
-    
-    guard let defaultLibrary = device.newDefaultLibrary() else {
+    guard let defaultLibrary = device.makeDefaultLibrary() else {
       assert(false)
       return
     }
     let vertexProgram = defaultLibrary.makeFunction(name: "vertexShader")!
     let fragmentProgram = defaultLibrary.makeFunction(name: "fragmentShader")!
-    
     let metalVertexDescriptor = myVertexDescriptor()
     
     pipelineState = compiledPipelineStateFrom(vertexShader: vertexProgram, fragmentShader: fragmentProgram, vertexDescriptor: metalVertexDescriptor)
@@ -73,7 +71,7 @@ class MandelbrotViewController: NSViewController {
     let path = Bundle.main.path(forResource: "pal", ofType: "png")!
     let data = try! Data(contentsOf: URL(fileURLWithPath: path))
     
-    paletteTexture = try! textureLoader.newTexture(with: data, options: nil)
+    paletteTexture = try! textureLoader.newTexture(data: data, options: nil)
     samplerState = square.defaultSampler(device)
     uniformBufferProvider = BufferProvider(inFlightBuffers: 3, device: device)
   }
@@ -98,7 +96,8 @@ class MandelbrotViewController: NSViewController {
 extension MandelbrotViewController {
   
   /// Compile vertex, fragment shaders and vertex descriptor into pipeline state object
-  func compiledPipelineStateFrom(vertexShader: MTLFunction, fragmentShader: MTLFunction, vertexDescriptor: MTLVertexDescriptor) -> MTLRenderPipelineState? {
+  func compiledPipelineStateFrom(vertexShader: MTLFunction,
+                                 fragmentShader: MTLFunction, vertexDescriptor: MTLVertexDescriptor) -> MTLRenderPipelineState? {
     let pipelineStateDescriptor = MTLRenderPipelineDescriptor()
     pipelineStateDescriptor.vertexDescriptor = vertexDescriptor
     pipelineStateDescriptor.vertexFunction = vertexShader
@@ -118,7 +117,7 @@ extension MandelbrotViewController {
     depthStencilDesc.depthCompareFunction = MTLCompareFunction.less
     depthStencilDesc.isDepthWriteEnabled = true
     
-    return device.makeDepthStencilState(descriptor: depthStencilDesc)
+    return device.makeDepthStencilState(descriptor: depthStencilDesc)!
   }
   
 }
@@ -170,23 +169,25 @@ extension MandelbrotViewController: MTKViewDelegate {
     renderPassDescriptor.colorAttachments[0].storeAction = MTLStoreAction.store
     renderPassDescriptor.colorAttachments[0].texture = drawable.texture
     
-    let commandBuffer = commandQ.makeCommandBuffer()
+    guard let commandBuffer = commandQ.makeCommandBuffer(),
+        let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
+        return
+    }
     
-    let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
     renderEncoder.setRenderPipelineState(pipelineState)
     renderEncoder.setDepthStencilState(depthStencilState)
     renderEncoder.setCullMode(MTLCullMode.none)
     
     if let squareBuffer = square?.vertexBuffer {
-      renderEncoder.setVertexBuffer(squareBuffer, offset: 0, at: 0)
+        renderEncoder.setVertexBuffer(squareBuffer, offset: 0, index: 0)
     }
     
     let uniformBuffer = uniformBufferProvider.nextBufferWithData(mandelbrotSceneUniform)
-    renderEncoder.setVertexBuffer(uniformBuffer, offset: 0, at: 1)
-    renderEncoder.setFragmentBuffer(uniformBuffer, offset: 0, at: 0)
+    renderEncoder.setVertexBuffer(uniformBuffer, offset: 0, index: 1)
+    renderEncoder.setFragmentBuffer(uniformBuffer, offset: 0, index: 0)
     
-    renderEncoder.setFragmentTexture(paletteTexture, at: 0)
-    renderEncoder.setFragmentSamplerState(samplerState, at: 0)
+    renderEncoder.setFragmentTexture(paletteTexture, index: 0)
+    renderEncoder.setFragmentSamplerState(samplerState, index: 0)
     
     renderEncoder.drawPrimitives(type: MTLPrimitiveType.triangle, vertexStart: 0, vertexCount: 6)
     
