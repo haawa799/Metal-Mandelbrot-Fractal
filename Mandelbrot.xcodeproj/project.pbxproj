@@ -24,7 +24,6 @@
 		43E0BC461C635495007599C4 /* MandelbrotViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MandelbrotViewController.swift; sourceTree = "<group>"; };
 		43E0BC481C635495007599C4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = ../Assets.xcassets; sourceTree = "<group>"; };
 		43E0BC4B1C635495007599C4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		43E0BC4D1C635495007599C4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../Info.plist; sourceTree = "<group>"; };
 		43E0BC531C635C4F007599C4 /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		43E0BC551C636556007599C4 /* Square.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Square.swift; sourceTree = "<group>"; };
 		43E0BC571C6394B1007599C4 /* pal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pal.png; sourceTree = "<group>"; };
@@ -45,7 +44,6 @@
 			isa = PBXGroup;
 			children = (
 				43E0BC441C635495007599C4 /* AppDelegate.swift */,
-				43E0BC4D1C635495007599C4 /* Info.plist */,
 				43E0BC481C635495007599C4 /* Assets.xcassets */,
 			);
 			path = "Supporting files";
